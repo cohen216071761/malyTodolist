@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -13,17 +12,22 @@ function App() {
 
   // טוען את כל המטלות
   const loadTasks = async () => {
-
     console.log("Loading tasks...");
     try {
       const res = await api.get("/tasks");
       console.log("API response:", res.data);
-const tasksArray = Array.isArray(res.data) ? res.data.map(t => ({
-  id: t.Id,
-  name: t.Name,
-  isComplete: t.IsComplete
-})) : [];
-setTasks(tasksArray);
+      
+      // המרה אחידה - תומכת גם באותיות גדולות וגם קטנות
+      const tasksArray = Array.isArray(res.data) 
+        ? res.data.map(t => ({
+            id: t.id || t.Id,
+            name: t.name || t.Name,
+            isComplete: t.isComplete ?? t.IsComplete ?? false
+          })) 
+        : [];
+      
+      console.log("Processed tasks:", tasksArray);
+      setTasks(tasksArray);
     } catch (err) {
       console.error("Error fetching tasks:", err);
     }
@@ -39,19 +43,15 @@ setTasks(tasksArray);
 
     try {
       const res = await api.post("/tasks", { Name: newTask, IsComplete: false });
-      // setTasks([...tasks, res.data]);
-
+      
       const newTaskFromServer = {
-  id: res.data.Id,
-  name: res.data.Name,
-  isComplete: res.data.IsComplete
-};
+        id: res.data.id || res.data.Id,
+        name: res.data.name || res.data.Name,
+        isComplete: res.data.isComplete ?? res.data.IsComplete ?? false
+      };
 
-setTasks([...tasks, newTaskFromServer]);
-
-
+      setTasks([...tasks, newTaskFromServer]);
       setNewTask("");
-     
     } catch (err) {
       console.error("Error adding task:", err);
     }
@@ -59,14 +59,15 @@ setTasks([...tasks, newTaskFromServer]);
 
   // מסמן מטלה כהושלמה / לא
   const toggleComplete = async (task) => {
-    const id = task.Id || task.id;
-    const isComplete = task.IsComplete ?? task.isComplete;
     try {
-      const res = await api.put(`/tasks/${id}`, { Name: task.Name || task.name, IsComplete: !isComplete });
-      setTasks(tasks.map(t => {
-        const tId = t.Id || t.id;
-  return tId === id ? { ...t, isComplete: !isComplete } : t;
-      }));
+      await api.put(`/tasks/${task.id}`, { 
+        Name: task.name, 
+        IsComplete: !task.isComplete 
+      });
+      
+      setTasks(tasks.map(t => 
+        t.id === task.id ? { ...t, isComplete: !task.isComplete } : t
+      ));
     } catch (err) {
       console.error("Error updating task:", err);
     }
@@ -74,10 +75,9 @@ setTasks([...tasks, newTaskFromServer]);
 
   // מוחק מטלה
   const deleteTask = async (task) => {
-    const id = task.Id || task.id;
     try {
-      await api.delete(`/tasks/${id}`);
-      setTasks(tasks.filter(t => (t.Id || t.id) !== id));
+      await api.delete(`/tasks/${task.id}`);
+      setTasks(tasks.filter(t => t.id !== task.id));
     } catch (err) {
       console.error("Error deleting task:", err);
     }
@@ -104,25 +104,25 @@ setTasks([...tasks, newTaskFromServer]);
         <p>אין מטלות להצגה</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
-          {tasks.map(task => {
-           const { id, name, isComplete } = task;
-
-
-            return (
-              <li key={id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
-                <input
-                  type="checkbox"
-                  checked={isComplete}
-                  onChange={() => toggleComplete(task)}
-                  style={{ marginRight: "10px" }}
-                />
-                <span style={{ flex: 1, textDecoration: isComplete ? "line-through" : "none" }}>
-                  {name}
-                </span>
-                <button onClick={() => deleteTask(task)} style={{ padding: "4px 8px" }}>מחק</button>
-              </li>
-            );
-          })}
+          {tasks.map(task => (
+            <li key={task.id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+              <input
+                type="checkbox"
+                checked={task.isComplete}
+                onChange={() => toggleComplete(task)}
+                style={{ marginRight: "10px" }}
+              />
+              <span style={{ 
+                flex: 1, 
+                textDecoration: task.isComplete ? "line-through" : "none" 
+              }}>
+                {task.name}
+              </span>
+              <button onClick={() => deleteTask(task)} style={{ padding: "4px 8px" }}>
+                מחק
+              </button>
+            </li>
+          ))}
         </ul>
       )}
     </div>
