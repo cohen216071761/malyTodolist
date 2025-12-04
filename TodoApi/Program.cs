@@ -45,6 +45,26 @@ builder.Logging.AddConsole();
 
 var app = builder.Build();
 
+// יצירת הטבלה אוטומטית אם היא לא קיימת
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ToDoDbContext>();
+    try
+    {
+        // בודק אם מסד הנתונים זמין
+        await dbContext.Database.CanConnectAsync();
+
+        // יוצר את הטבלה אם היא לא קיימת
+        await dbContext.Database.EnsureCreatedAsync();
+
+        Console.WriteLine("Database and tables created successfully!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database initialization error: {ex.Message}");
+    }
+}
+
 // CORS חייב להיות ראשון
 app.UseCors("AllowClientAccess");
 
