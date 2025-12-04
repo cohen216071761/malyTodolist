@@ -1,0 +1,11 @@
+CREATE DATABASE MyDatabase;
+USE MyDatabase;
+
+CREATE TABLE Tasks (
+    Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100),
+    IsComplete TINYINT(1)
+);
+SHOW DATABASES;
+use ToDoDB;
+SELECT * FROM Tasks;
