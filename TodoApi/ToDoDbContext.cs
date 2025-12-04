@@ -16,9 +16,5 @@ public class ToDoDbContext : DbContext
     public DbSet<TodoItem> Tasks { get; set; } = null!;
 
     // הגדרת שם הטבלה במסד הנתונים (כפי שהיה בקוד הקודם)
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TodoItem>().ToTable("Items");
-
-    }
+   
 }

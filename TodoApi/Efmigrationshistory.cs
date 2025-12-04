@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TodoApi;
+namespace ToDoApi;
 
 public partial class Efmigrationshistory
 {
