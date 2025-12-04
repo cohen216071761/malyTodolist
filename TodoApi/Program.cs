@@ -49,19 +49,34 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ToDoDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
     try
     {
-        // בודק אם מסד הנתונים זמין
+        logger.LogInformation("🔄 Checking database connection...");
         await dbContext.Database.CanConnectAsync();
+        logger.LogInformation("✅ Database connected successfully");
 
-        // יוצר את הטבלה אם היא לא קיימת
-        await dbContext.Database.EnsureCreatedAsync();
+        // יצירת הטבלה באמצעות SQL ישיר
+        var connection = dbContext.Database.GetDbConnection();
+        await connection.OpenAsync();
 
-        Console.WriteLine("Database and tables created successfully!");
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Tasks (
+                Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                Name VARCHAR(100) NOT NULL,
+                IsComplete TINYINT(1) NOT NULL DEFAULT 0
+            )";
+
+        await command.ExecuteNonQueryAsync();
+        logger.LogInformation("✅ Tasks table created/verified successfully!");
+
+        await connection.CloseAsync();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Database initialization error: {ex.Message}");
+        logger.LogError(ex, "❌ Database initialization error: {Message}", ex.Message);
     }
 }
 
@@ -235,6 +250,32 @@ app.MapGet("/debug/table-structure", async (ToDoDbContext db) =>
         }
 
         return Results.Ok(columns);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
+});
+
+// endpoint ליצירת הטבלה (זמני - למחוק אחרי השימוש!)
+app.MapPost("/debug/create-table", async (ToDoDbContext db) =>
+{
+    try
+    {
+        var connection = db.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS Tasks (
+                Id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                Name VARCHAR(100) NOT NULL,
+                IsComplete TINYINT(1) NOT NULL DEFAULT 0
+            )";
+
+        await command.ExecuteNonQueryAsync();
+
+        return Results.Ok(new { message = "Table created successfully!" });
     }
     catch (Exception ex)
     {
