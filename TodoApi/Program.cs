@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ToDoApi;
+using TodoApi;
 
 // יש לוודא שה-Namespaces של ה-Models וה-DbContext נכללים
 // אם הם מוגדרים ב-namespace אחר, יש להוסיף אותו כאן.

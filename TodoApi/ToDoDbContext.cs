@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 // וודאי שה-namespace של המודל נכון
 // using YourProjectName.Models; 
 
-namespace ToDoApi;
+namespace TodoApi;
 
 public class ToDoDbContext : DbContext
 {

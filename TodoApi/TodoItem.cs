@@ -1,4 +1,4 @@
-namespace ToDoApi;
+namespace TodoApi;
 
 public class TodoItem
 {
