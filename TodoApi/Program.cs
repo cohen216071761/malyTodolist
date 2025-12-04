@@ -85,7 +85,7 @@ apiRoutes.MapPut("/{id}", async (int id, TodoItem inputTask, ToDoDbContext db) =
     if (itemToUpdate == null) return Results.NotFound();
 
     itemToUpdate.Name = inputTask.Name; // שם המאפיין הוא Name (מתוקן)
-    itemToUpdate.IsComplete = inputTask.IsCompleted; // *** וודא שזה IsCompleted או IsComplete בהתאם ל-TodoItem.cs ***
+    itemToUpdate.IsCompleted = inputTask.IsCompleted; // *** וודא שזה IsCompleted או IsComplete בהתאם ל-TodoItem.cs ***
 
     await db.SaveChangesAsync();
     return Results.NoContent();

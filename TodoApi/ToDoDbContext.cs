@@ -19,5 +19,6 @@ public class ToDoDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<TodoItem>().ToTable("Items");
+
     }
 }

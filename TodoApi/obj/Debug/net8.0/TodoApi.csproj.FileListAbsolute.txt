@@ -133,3 +133,14 @@ C:\Users\user1\Documents\תכנות ו\פרקטיקוד\הגשה 3\TodoApi\obj\D
 C:\Users\user1\Documents\תכנות ו\פרקטיקוד\הגשה 3\TodoApi\obj\Debug\net8.0\TodoApi.pdb
 C:\Users\user1\Documents\תכנות ו\פרקטיקוד\הגשה 3\TodoApi\obj\Debug\net8.0\TodoApi.genruntimeconfig.cache
 C:\Users\user1\Documents\תכנות ו\פרקטיקוד\הגשה 3\TodoApi\obj\Debug\net8.0\ref\TodoApi.dll
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.csproj.AssemblyReference.cache
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.AssemblyInfoInputs.cache
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.AssemblyInfo.cs
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.csproj.CoreCompileInputs.cache
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.sourcelink.json
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.dll
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\refint\TodoApi.dll
+C:\Users\user1\Downloads\ToDoApI-main\ToDoApI-main\TodoApi\obj\Debug\net8.0\TodoApi.pdb
