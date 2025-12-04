@@ -16,18 +16,16 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// הגדרת CORS
+// הגדרת CORS - מאפשר בקשות מכל מקור
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowClientAccess",
         policy =>
         {
-            policy.WithOrigins(
-                        "https://malytodolist.onrender.com",
-                        "http://localhost:3000"
-                    )
+            policy.SetIsOriginAllowed(_ => true) // מאפשר כל מקור
                     .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    .AllowAnyHeader()
+                    .AllowCredentials();
         });
 });
 
@@ -182,6 +180,41 @@ app.MapGet("/health", async (ToDoDbContext db) =>
     {
         await db.Database.CanConnectAsync();
         return Results.Ok(new { status = "healthy", database = "connected" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
+});
+
+// בדיקת מבנה הטבלה (endpoint זמני לבדיקה)
+app.MapGet("/debug/table-structure", async (ToDoDbContext db) =>
+{
+    try
+    {
+        var connection = db.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = "DESCRIBE Tasks";
+
+        var reader = await command.ExecuteReaderAsync();
+        var columns = new List<object>();
+
+        while (await reader.ReadAsync())
+        {
+            columns.Add(new
+            {
+                Field = reader.GetString(0),
+                Type = reader.GetString(1),
+                Null = reader.GetString(2),
+                Key = reader.GetString(3),
+                Default = reader.IsDBNull(4) ? null : reader.GetString(4),
+                Extra = reader.GetString(5)
+            });
+        }
+
+        return Results.Ok(columns);
     }
     catch (Exception ex)
     {
