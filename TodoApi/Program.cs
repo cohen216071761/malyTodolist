@@ -1,59 +1,76 @@
+using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using System;
 
-// -------------------- BUILD --------------------
+// יש לוודא שה-Namespaces של ה-Models וה-DbContext נכללים
+// אם הם מוגדרים ב-namespace אחר, יש להוסיף אותו כאן.
+// for example: using YourProjectName.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// -------------------- SERVICES --------------------
+// --- הגדרות פורטים עבור Render ---
+// קריטי לשרתי Render המשתמשים ב-Docker
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// DbContext עם MySQL
-builder.Services.AddDbContext<ToDoDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("ToDoDB"),
-        new MySqlServerVersion(new Version(8, 0, 44))
-    )
-);
-
-// CORS - מאפשר רק ל‑React frontend שלך גישה
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReactApp", policy =>
-        policy.WithOrigins("https://todoapi-client-igk3.onrender.com") // כתובת ה־frontend שלך
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-    );
-});
-
-// Swagger
+// --- הוספת שירותים ---
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// --- הגדרת CORS ---
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClientAccess", // שינוי שם המדיניות
+        policy =>
+        {
+            policy.WithOrigins(
+                        // הכתובת של הלקוח שלך בפרויקט הקודם
+                        "https://malytodolist.onrender.com",
+                        "http://localhost:3000" // לצרכי פיתוח מקומי
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+        });
+});
+
+// --- חיבור למסד הנתונים ---
+var connectionString = builder.Configuration.GetConnectionString("ToDoDB");
+
+builder.Services.AddDbContext<ToDoDbContext>(options =>
+{
+    var connStr = connectionString ?? "Server=localhost;Database=test;User=root;Password=root;";
+    // שימוש ב-MySqlServerVersion(new Version(8, 0, 44)) כפי שהיה בקוד הקודם שלך
+    options.UseMySql(connStr, new MySqlServerVersion(new Version(8, 0, 44)));
+});
+
 var app = builder.Build();
 
-// -------------------- MIDDLEWARE --------------------
+// --- קריטי: CORS חייב להיות לפני כל השאר! ---
+app.UseCors("AllowClientAccess"); // שימוש בשם המדיניות המעודכן
 
-// CORS צריך להיות **לפני כל ה‑endpoints**
-app.UseCors("AllowReactApp");
-
+// הגדרת Swagger UI
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ToDo API V1");
+    // אין צורך להגדיר את RoutePrefix אם משתמשים ב-app.MapGet("/", ...)
+});
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-// -------------------- ROUTES --------------------
+// --- הגדרת נתיבים (Routes) ---
+// שימוש ב-/tasks כפי שהיה בקוד הקודם שלך
+var apiRoutes = app.MapGroup("/tasks");
 
 // Get כל המשימות
-app.MapGet("/tasks", async (ToDoDbContext db) =>
+apiRoutes.MapGet("/", async (ToDoDbContext db) =>
 {
-    return await db.Tasks.ToListAsync();
+    // שימוש ב-Tasks במקום Items
+    return Results.Ok(await db.Tasks.ToListAsync());
 });
 
 // Post משימה חדשה
-app.MapPost("/tasks", async (ToDoTask task, ToDoDbContext db) =>
+apiRoutes.MapPost("/", async (ToDoTask task, ToDoDbContext db) =>
 {
     db.Tasks.Add(task);
     await db.SaveChangesAsync();
@@ -61,35 +78,36 @@ app.MapPost("/tasks", async (ToDoTask task, ToDoDbContext db) =>
 });
 
 // Put עדכון משימה
-app.MapPut("/tasks/{id}", async (int id, ToDoTask updatedTask, ToDoDbContext db) =>
+apiRoutes.MapPut("/{id}", async (int id, ToDoTask inputTask, ToDoDbContext db) =>
 {
-    var task = await db.Tasks.FindAsync(id);
-    if (task == null) return Results.NotFound();
+    var itemToUpdate = await db.Tasks.FindAsync(id);
+    if (itemToUpdate == null) return Results.NotFound();
 
-    task.Name = updatedTask.Name;
-    task.IsComplete = updatedTask.IsComplete;
+    itemToUpdate.Name = inputTask.Name;
+    itemToUpdate.IsComplete = inputTask.IsComplete;
 
-    await db.SaveChangesAsync();
-    return Results.Ok(task);
-});
-
-// Delete מחיקת משימה
-app.MapDelete("/tasks/{id}", async (int id, ToDoDbContext db) =>
-{
-    var task = await db.Tasks.FindAsync(id);
-    if (task == null) return Results.NotFound();
-
-    db.Tasks.Remove(task);
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
 
-// Fallback ל‑React (אחרי כל ה‑endpoints)
-app.MapFallbackToFile("index.html");
+// Delete מחיקת משימה
+apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
+{
+    var item = await db.Tasks.FindAsync(id);
+    if (item == null) return Results.NotFound();
+
+    db.Tasks.Remove(item);
+    await db.SaveChangesAsync();
+    return Results.NoContent();
+});
+
+// הפניה מהשורש ל-Swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.Run();
 
 // -------------------- MODELS --------------------
+// אם המודלים לא הוגדרו בקובץ נפרד (כמו ToDoTask.cs), יש להוסיף אותם כאן.
 public class ToDoTask
 {
     public int Id { get; set; }
