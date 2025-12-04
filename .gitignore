@@ -1,0 +1,9 @@
+# Visual Studio / IDE Files
+.vs/
+
+# Node modules (מה שהיה ככל הנראה בתיקיית ה-React שלך)
+node_modules/
+
+# Build outputs
+build/
+dist/
