@@ -84,41 +84,94 @@ function App() {
   };
 
   return (
-    <div style={{ maxWidth: "500px", margin: "50px auto", fontFamily: "Arial" }}>
+    <div style={{ 
+      maxWidth: "500px", 
+      margin: "50px auto", 
+      fontFamily: "Arial, sans-serif",
+      direction: "rtl" 
+    }}>
       <h1>Todo List</h1>
 
-      <div style={{ display: "flex", marginBottom: "20px" }}>
+      <div style={{ display: "flex", marginBottom: "20px", gap: "10px" }}>
         <input
           type="text"
           value={newTask}
           onChange={e => setNewTask(e.target.value)}
           placeholder="הכנס מטלה חדשה"
-          style={{ flex: 1, padding: "8px" }}
+          style={{ 
+            flex: 1, 
+            padding: "10px",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "4px"
+          }}
         />
-        <button onClick={addTask} style={{ padding: "8px 16px", marginLeft: "10px" }}>
+        <button 
+          onClick={addTask} 
+          style={{ 
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
           הוסף
         </button>
       </div>
 
       {tasks.length === 0 ? (
-        <p>אין מטלות להצגה</p>
+        <p style={{ fontSize: "16px", color: "#666" }}>אין מטלות להצגה</p>
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {tasks.map(task => (
-            <li key={task.id} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+            <li 
+              key={task.id} 
+              style={{ 
+                display: "flex", 
+                alignItems: "center", 
+                marginBottom: "15px",
+                padding: "10px",
+                backgroundColor: "#f8f9fa",
+                borderRadius: "4px",
+                border: "1px solid #dee2e6"
+              }}
+            >
               <input
                 type="checkbox"
                 checked={task.isComplete}
                 onChange={() => toggleComplete(task)}
-                style={{ marginRight: "10px" }}
+                style={{ 
+                  marginLeft: "10px",
+                  width: "18px",
+                  height: "18px",
+                  cursor: "pointer"
+                }}
               />
               <span style={{ 
-                flex: 1, 
-                textDecoration: task.isComplete ? "line-through" : "none" 
+                flex: 1,
+                fontSize: "16px",
+                fontWeight: "500",
+                color: "#212529",
+                textDecoration: task.isComplete ? "line-through" : "none",
+                opacity: task.isComplete ? 0.6 : 1
               }}>
                 {task.name}
               </span>
-              <button onClick={() => deleteTask(task)} style={{ padding: "4px 8px" }}>
+              <button 
+                onClick={() => deleteTask(task)} 
+                style={{ 
+                  padding: "6px 12px",
+                  fontSize: "14px",
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+              >
                 מחק
               </button>
             </li>
