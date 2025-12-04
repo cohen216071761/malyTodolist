@@ -1,24 +1,23 @@
 using Microsoft.EntityFrameworkCore;
+// וודאי שה-namespace של המודל נכון
+// using YourProjectName.Models; 
 
 namespace ToDoApi;
 
 public class ToDoDbContext : DbContext
 {
+    // הקונסטרקטור מקבל את ההגדרות מה-DI ב-Program.cs
     public ToDoDbContext(DbContextOptions<ToDoDbContext> options)
         : base(options)
     {
     }
 
-    public DbSet<TodoItem> Tasks { get; set; }
+    // וודאי שהמודל TodoItem קיים ומוגדר נכון
+    public DbSet<TodoItem> Tasks { get; set; } = null!;
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // הגדרת שם הטבלה במסד הנתונים (כפי שהיה בקוד הקודם)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseMySql(
-                "name=ToDoDB",
-                new MySqlServerVersion(new Version(8, 0, 44))
-            );
-        }
+        modelBuilder.Entity<TodoItem>().ToTable("Items");
     }
 }
