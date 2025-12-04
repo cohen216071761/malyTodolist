@@ -2,7 +2,8 @@ import axios from "axios";
 
 // הגדרת כתובת API ברירת מחדל
 const api = axios.create({
-  baseURL: "http://localhost:5000" // עדכני לפי הפורט של ה-API שלך
+    // *** כתובת Render הנכונה ***
+    baseURL: "https://malytodolistservice.onrender.com"
 });
 
 // Interceptor ללכידת שגיאות

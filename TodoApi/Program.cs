@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ToDoApi;
 
 // יש לוודא שה-Namespaces של ה-Models וה-DbContext נכללים
 // אם הם מוגדרים ב-namespace אחר, יש להוסיף אותו כאן.
@@ -59,18 +60,17 @@ app.UseSwaggerUI(c =>
 });
 
 // --- הגדרת נתיבים (Routes) ---
-// שימוש ב-/tasks כפי שהיה בקוד הקודם שלך
 var apiRoutes = app.MapGroup("/tasks");
 
 // Get כל המשימות
 apiRoutes.MapGet("/", async (ToDoDbContext db) =>
 {
-    // שימוש ב-Tasks במקום Items
     return Results.Ok(await db.Tasks.ToListAsync());
 });
 
 // Post משימה חדשה
-apiRoutes.MapPost("/", async (ToDoTask task, ToDoDbContext db) =>
+// *** החלף את ToDoTask ב-TodoItem ***
+apiRoutes.MapPost("/", async (TodoItem task, ToDoDbContext db) =>
 {
     db.Tasks.Add(task);
     await db.SaveChangesAsync();
@@ -78,13 +78,14 @@ apiRoutes.MapPost("/", async (ToDoTask task, ToDoDbContext db) =>
 });
 
 // Put עדכון משימה
-apiRoutes.MapPut("/{id}", async (int id, ToDoTask inputTask, ToDoDbContext db) =>
+// *** החלף את ToDoTask ב-TodoItem ***
+apiRoutes.MapPut("/{id}", async (int id, TodoItem inputTask, ToDoDbContext db) =>
 {
     var itemToUpdate = await db.Tasks.FindAsync(id);
     if (itemToUpdate == null) return Results.NotFound();
 
-    itemToUpdate.Name = inputTask.Name;
-    itemToUpdate.IsComplete = inputTask.IsComplete;
+    itemToUpdate.Name = inputTask.Name; // שם המאפיין הוא Name (מתוקן)
+    itemToUpdate.IsComplete = inputTask.IsCompleted; // *** וודא שזה IsCompleted או IsComplete בהתאם ל-TodoItem.cs ***
 
     await db.SaveChangesAsync();
     return Results.NoContent();
@@ -100,31 +101,8 @@ apiRoutes.MapDelete("/{id}", async (int id, ToDoDbContext db) =>
     await db.SaveChangesAsync();
     return Results.NoContent();
 });
-
 // הפניה מהשורש ל-Swagger
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.Run();
 
-// -------------------- MODELS --------------------
-// אם המודלים לא הוגדרו בקובץ נפרד (כמו ToDoTask.cs), יש להוסיף אותם כאן.
-public class ToDoTask
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public bool IsComplete { get; set; }
-}
-
-// -------------------- DbContext --------------------
-public class ToDoDbContext : DbContext
-{
-    public ToDoDbContext(DbContextOptions<ToDoDbContext> options)
-        : base(options) { }
-
-    public DbSet<ToDoTask> Tasks { get; set; } = null!;
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<ToDoTask>().ToTable("Items");
-    }
-}
